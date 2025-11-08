@@ -1,0 +1,295 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>邮件管理系统</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <div class="container">
+        <header>
+            <div class="header-left">
+                <h1>📧 邮件管理系统</h1>
+                <div class="user-info">
+                    <div class="user-avatar">我</div>
+                    <div class="user-details">
+                        <div class="user-name">管理员</div>
+                        <div class="user-email">admin@example.com</div>
+                    </div>
+                </div>
+            </div>
+            <div class="header-right">
+                <div class="stats-bar">
+                    <div class="stat-item">
+                        <span class="stat-label">总邮件</span>
+                        <span class="stat-value" id="totalEmails">0</span>
+                    </div>
+                    <div class="stat-item">
+                        <span class="stat-label">未读</span>
+                        <span class="stat-value unread-count" id="unreadCount">0</span>
+                    </div>
+                    <div class="stat-item">
+                        <span class="stat-label">重要</span>
+                        <span class="stat-value important-count" id="importantCount">0</span>
+                    </div>
+                </div>
+                <div class="search-box">
+                    <input type="text" id="searchInput" placeholder="搜索邮件、发件人、主题...">
+                    <button id="searchBtn">🔍 搜索</button>
+                    <button id="clearSearchBtn" class="clear-btn" style="display: none;">✕</button>
+                </div>
+            </div>
+        </header>
+
+        <div class="main-content">
+            <aside class="sidebar">
+                <div class="sidebar-section">
+                    <div class="menu-item active" data-filter="all">
+                        <span>📬</span> 
+                        <span class="menu-text">所有邮件</span>
+                        <span class="menu-badge" id="badge-all">0</span>
+                    </div>
+                    <div class="menu-item" data-filter="unread">
+                        <span>📭</span> 
+                        <span class="menu-text">未读邮件</span>
+                        <span class="menu-badge" id="badge-unread">0</span>
+                    </div>
+                    <div class="menu-item" data-filter="read">
+                        <span>📨</span> 
+                        <span class="menu-text">已读邮件</span>
+                        <span class="menu-badge" id="badge-read">0</span>
+                    </div>
+                    <div class="menu-item" data-filter="important">
+                        <span>⭐</span> 
+                        <span class="menu-text">重要邮件</span>
+                        <span class="menu-badge" id="badge-important">0</span>
+                    </div>
+                    <div class="menu-item" data-filter="sent">
+                        <span>📤</span> 
+                        <span class="menu-text">已发送</span>
+                        <span class="menu-badge" id="badge-sent">0</span>
+                    </div>
+                    <div class="menu-item" data-filter="draft">
+                        <span>📝</span> 
+                        <span class="menu-text">草稿箱</span>
+                        <span class="menu-badge" id="badge-draft">0</span>
+                    </div>
+                    <div class="menu-item" data-filter="trash">
+                        <span>🗑️</span> 
+                        <span class="menu-text">垃圾箱</span>
+                        <span class="menu-badge" id="badge-trash">0</span>
+                    </div>
+                </div>
+
+                <div class="sidebar-divider"></div>
+
+                <div class="sidebar-section">
+                    <div class="section-title">标签</div>
+                    <div class="tag-list" id="tagList">
+                        <div class="tag-item" data-tag="工作">
+                            <span class="tag-color" style="background: #667eea;"></span>
+                            <span>工作</span>
+                            <span class="tag-count">0</span>
+                        </div>
+                        <div class="tag-item" data-tag="个人">
+                            <span class="tag-color" style="background: #f093fb;"></span>
+                            <span>个人</span>
+                            <span class="tag-count">0</span>
+                        </div>
+                        <div class="tag-item" data-tag="项目">
+                            <span class="tag-color" style="background: #4facfe;"></span>
+                            <span>项目</span>
+                            <span class="tag-count">0</span>
+                        </div>
+                        <div class="tag-item" data-tag="通知">
+                            <span class="tag-color" style="background: #43e97b;"></span>
+                            <span>通知</span>
+                            <span class="tag-count">0</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="sidebar-divider"></div>
+
+                <div class="sidebar-section">
+                    <div class="menu-item compose-btn" id="composeBtn">
+                        <span>✏️</span> 
+                        <span class="menu-text">写邮件</span>
+                    </div>
+                    <div class="menu-item" id="settingsBtn">
+                        <span>⚙️</span> 
+                        <span class="menu-text">设置</span>
+                    </div>
+                </div>
+            </aside>
+
+            <main class="email-list-container">
+                <div class="toolbar">
+                    <div class="toolbar-left">
+                        <input type="checkbox" id="selectAll" title="全选">
+                        <button class="toolbar-btn" id="markReadBtn" title="标记为已读">
+                            <span>✓</span> 已读
+                        </button>
+                        <button class="toolbar-btn" id="markUnreadBtn" title="标记为未读">
+                            <span>✗</span> 未读
+                        </button>
+                        <button class="toolbar-btn" id="deleteSelectedBtn" title="删除选中">
+                            <span>🗑️</span> 删除
+                        </button>
+                        <button class="toolbar-btn" id="refreshBtn" title="刷新">
+                            <span>🔄</span> 刷新
+                        </button>
+                    </div>
+                    <div class="toolbar-right">
+                        <select id="sortSelect" class="sort-select">
+                            <option value="time-desc">最新优先</option>
+                            <option value="time-asc">最旧优先</option>
+                            <option value="sender-asc">发件人 A-Z</option>
+                            <option value="subject-asc">主题 A-Z</option>
+                        </select>
+                        <div class="view-toggle">
+                            <button class="view-btn active" data-view="list" title="列表视图">☰</button>
+                            <button class="view-btn" data-view="compact" title="紧凑视图">☷</button>
+                        </div>
+                    </div>
+                </div>
+                <div class="email-list" id="emailList">
+                    <!-- 邮件列表将在这里动态生成 -->
+                </div>
+            </main>
+
+            <div class="email-detail" id="emailDetail">
+                <div class="detail-placeholder">
+                    <div class="placeholder-icon">📧</div>
+                    <p>选择一个邮件查看详情</p>
+                    <p class="placeholder-hint">点击左侧邮件列表中的任意邮件</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 写邮件模态框 -->
+    <div class="modal" id="composeModal">
+        <div class="modal-content compose-modal">
+            <span class="close">&times;</span>
+            <h2>✏️ 写邮件</h2>
+            <form id="composeForm">
+                <div class="form-group">
+                    <label>收件人：</label>
+                    <input type="email" id="recipient" placeholder="输入邮箱地址" required>
+                </div>
+                <div class="form-group">
+                    <label>抄送 (CC)：</label>
+                    <input type="email" id="cc" placeholder="可选，多个邮箱用逗号分隔">
+                </div>
+                <div class="form-group">
+                    <label>主题：</label>
+                    <input type="text" id="subject" placeholder="输入邮件主题" required>
+                </div>
+                <div class="form-group">
+                    <label>标签：</label>
+                    <select id="emailTag" class="tag-select">
+                        <option value="">无标签</option>
+                        <option value="工作">工作</option>
+                        <option value="个人">个人</option>
+                        <option value="项目">项目</option>
+                        <option value="通知">通知</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label>内容：</label>
+                    <textarea id="content" rows="12" placeholder="输入邮件内容..." required></textarea>
+                </div>
+                <div class="form-group">
+                    <label>
+                        <input type="checkbox" id="markImportant"> 标记为重要
+                    </label>
+                </div>
+                <div class="form-actions">
+                    <button type="button" class="btn-secondary" id="saveDraftBtn">保存草稿</button>
+                    <button type="button" class="btn-secondary" id="cancelBtn">取消</button>
+                    <button type="submit" class="btn-primary">📤 发送</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- 设置模态框 -->
+    <div class="modal" id="settingsModal">
+        <div class="modal-content">
+            <span class="close" id="closeSettings">&times;</span>
+            <h2>⚙️ 设置</h2>
+            <div class="settings-content">
+                <div class="setting-group">
+                    <h3>显示设置</h3>
+                    <div class="setting-item">
+                        <label>
+                            <input type="checkbox" id="autoMarkRead" checked>
+                            打开邮件时自动标记为已读
+                        </label>
+                    </div>
+                    <div class="setting-item">
+                        <label>
+                            <input type="checkbox" id="showPreview">
+                            显示邮件预览
+                        </label>
+                    </div>
+                    <div class="setting-item">
+                        <label>
+                            每页显示邮件数：
+                            <select id="emailsPerPage">
+                                <option value="10">10</option>
+                                <option value="20" selected>20</option>
+                                <option value="50">50</option>
+                                <option value="100">100</option>
+                            </select>
+                        </label>
+                    </div>
+                </div>
+                <div class="setting-group">
+                    <h3>通知设置</h3>
+                    <div class="setting-item">
+                        <label>
+                            <input type="checkbox" id="emailNotifications" checked>
+                            启用邮件通知
+                        </label>
+                    </div>
+                    <div class="setting-item">
+                        <label>
+                            <input type="checkbox" id="soundNotifications">
+                            启用声音提醒
+                        </label>
+                    </div>
+                </div>
+                <div class="setting-group">
+                    <h3>主题设置</h3>
+                    <div class="setting-item">
+                        <label>
+                            主题颜色：
+                            <select id="themeColor">
+                                <option value="purple" selected>紫色</option>
+                                <option value="blue">蓝色</option>
+                                <option value="green">绿色</option>
+                                <option value="red">红色</option>
+                            </select>
+                        </label>
+                    </div>
+                </div>
+            </div>
+            <div class="form-actions">
+                <button type="button" class="btn-primary" id="saveSettingsBtn">保存设置</button>
+                <button type="button" class="btn-secondary" id="cancelSettingsBtn">取消</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- 通知提示 -->
+    <div class="notification" id="notification">
+        <span id="notificationText"></span>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+</html>
+
